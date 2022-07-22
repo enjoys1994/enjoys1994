@@ -1,5 +1,5 @@
 #生成k8s kubeconfig的
-
+# ./generaterKubeconfig.sh  10.20.144.28:8443
 
 CN=kubernetes
 role=apiserver-kubelet-client

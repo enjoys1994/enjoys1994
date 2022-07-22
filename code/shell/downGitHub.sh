@@ -1,4 +1,6 @@
 
+#./downGitHub.sh https://github.com/wangguoyan/java_demo.git
+
 git config --global http.proxy 127.0.0.1:15236
 git config --global https.proxy 127.0.0.1:15236
 
