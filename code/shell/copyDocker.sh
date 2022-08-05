@@ -1,0 +1,1 @@
+cp /root/.docker/config.json /var/lib/kubelet/ && systemctl daemon-reload && systemctl restart kubelet
