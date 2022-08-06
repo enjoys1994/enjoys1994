@@ -1,1 +1,1 @@
-cp /root/.docker/config.json /var/lib/kubelet/ && systemctl daemon-reload && systemctl restart kubelet
+rm -fr /var/lib/kubelet/config.json &&  cp /root/.docker/config.json /var/lib/kubelet/ && systemctl daemon-reload && systemctl restart kubelet
