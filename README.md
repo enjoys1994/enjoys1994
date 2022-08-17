@@ -8,5 +8,9 @@
   <img src="https://github.com/MikeCodesDotNET/ColoredBadges/raw/master/svg/dev/tools/docker.svg" alt="docker" style="max-width:100%;">
 </p>
 
-
-[![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=wangguoyan&show_icons=true&theme=moltack)](https://github.com/wangguoyan)
+<a href="https://github.com/wangguoyan">
+  <img align="center" height="170px" src="https://github-readme-stats.vercel.app/api?username=wangguoyan&show_icons=true&theme=buefy" />
+</a>
+<a href="https://github.com/wangguoyan">
+  <img align="center" height="170px" src="https://github-readme-stats.vercel.app/api/top-langs/?username=wangguoyan&layout=compact&show_icons=true&theme=buefy" />
+</a>
