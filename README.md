@@ -1,3 +1,7 @@
+## Welcome to my Homepage 👋 
+
+#### Number of visitors: ![](https://visitor-badge.glitch.me/badge?page_id=wangguoyan.wangguoyan)
+
 <p align="left">
   
   <img src="https://github.com/MikeCodesDotNET/ColoredBadges/raw/master/svg/dev/languages/java.svg" alt="python" style="max-width:100%;">
