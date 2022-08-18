@@ -5,21 +5,34 @@
 
 #### Number of visitors: ![](https://visitor-badge.glitch.me/badge?page_id=wangguoyan.wangguoyan)
 
-<p align="left">
-  
+
+<div align="center">  
+  <p align="left">
   <img src="https://github.com/MikeCodesDotNET/ColoredBadges/raw/master/svg/dev/languages/java.svg" alt="python" style="max-width:100%;">
   <img src="https://github.com/MikeCodesDotNET/ColoredBadges/raw/master/svg/dev/languages/go.svg" alt="go" style="max-width:100%;">
   <img src="https://github.com/MikeCodesDotNET/ColoredBadges/raw/master/svg/dev/tools/bash.svg" alt="bash" style="max-width:100%;">
   <img src="https://github.com/MikeCodesDotNET/ColoredBadges/raw/master/svg/dev/services/kubernetes.svg" alt="kubernetes" style="max-width:100%;">
   <img src="https://github.com/MikeCodesDotNET/ColoredBadges/raw/master/svg/dev/tools/docker.svg" alt="docker" style="max-width:100%;">
 </p>
-
+ 
 <a href="https://github.com/wangguoyan">
   <img align="center" height="170px" src="https://github-readme-stats.vercel.app/api?username=wangguoyan&show_icons=true&theme=buefy" />
 </a>
 <a href="https://github.com/wangguoyan">
   <img align="center" height="170px" src="https://github-readme-stats.vercel.app/api/top-langs/?username=wangguoyan&layout=compact&show_icons=true&theme=buefy" />
 </a>
+<a href="https://github.com/wangguoyan">
+  <img align="center" height="170px" src="https://github-readme-streak-stats.herokuapp.com?user=wangguoyan&theme=onedark&date_format=M%20j%5B%2C%20Y%5D" />
+</a>
+
+![wanggy's github activity graph](https://activity-graph.herokuapp.com/graph?username=wangguoyan&theme=dracula)
+  
+  
+</div>
+<div align="center">
+    <img  src="./icon/github-contribution-grid-snake.svg" />
+    <br />
+</div>
 
 <!--
 **wangguoyan/wangguoyan** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
