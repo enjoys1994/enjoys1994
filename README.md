@@ -21,9 +21,6 @@
 <a href="https://github.com/wangguoyan">
   <img align="center"  with="49%" height="170px" src="https://github-readme-stats.vercel.app/api/top-langs/?username=wangguoyan&layout=compact&show_icons=true&theme=buefy" />
 </a>
-<a href="https://github.com/wangguoyan">
-  <img align="center" height="170px" src="https://github-readme-streak-stats.herokuapp.com?user=wangguoyan&theme=onedark&date_format=M%20j%5B%2C%20Y%5D" />
-</a>
   <a href="https://github.com/wangguoyan">
    <img  src="./icon/github-contribution-grid-snake.svg" />
 </a>
