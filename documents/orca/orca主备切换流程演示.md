@@ -1,0 +1,362 @@
+# 准备
+## 安装Orca
+### 指定管理集群名称
+执行install时使用“-c 管理集群名称”指定名称，名称和submariner配置对应。
+
+集群10.20.144.165: cluster-a
+
+集群10.20.144.166: cluster-b
+
+## 集群配置
+### 接管
+在10.20.144.165上接管cluster-b
+
+在10.20.144.166上接管cluster-a
+
+```
+# 获取apiserver
+cat ~/.kube/config
+# 获取token
+# 查看sa对应的secret
+kubectl describe sa ko-admin -n kube-system
+# 查看secret内的token
+kubectl describe secret ko-admin-token-xxxx -n kube-system
+```
+
+### 打标签
+在两个集群都需要执行以下命令
+
+```
+# 集群打标签
+# 给cluster-a打标签
+kubectl label cluster -n orca-system   cluster-a orcastack.io/role=controller
+kubectl label cluster -n orca-system   cluster-a orcastack.io/replication-role=primary
+kubectl label cluster -n orca-system   cluster-a topology.kubernetes.io/zone=A
+kubectl label clustercredentials -n orca-system   cluster-a orcastack.io/controller-cluster=true
+kubectl label cluster -n orca-system   cluster-a orcastack.io/replication-primary=cluster-b
+# 给cluster-b打标签
+kubectl label clustercredential -n orca-system   cluster-b orcastack.io/controller-cluster=true
+kubectl label cluster -n orca-system   cluster-b orcastack.io/role=controller
+kubectl label cluster -n orca-system   cluster-b orcastack.io/replication-role=secondary
+kubectl label cluster -n orca-system   cluster-b orcastack.io/replication-primary=cluster-a
+kubectl label cluster -n orca-system   cluster-b topology.kubernetes.io/zone=B
+```
+
+### 主备集群上传组件包
+在主集群和备集群分别上传组件包以及hpa-demo应用包。
+
+### 开启etcd-mirror (主备集群都需要)
+主集群获取etcd相关信息
+
+```
+cd /etc/kubernetes/pki/etcd/
+cat ca.crt
+cat server.crt
+cat server.key
+```
+
+修改备集群(10.20.144.166)etcd-mirror中 values.yaml中configmap.master_etcd_auth相关配置
+
+master_etcd_cacert 对应 ca.crt
+
+master_etcd_cert 对应 server.crt
+
+master_etcd_key 对应 server.key
+
+```
+#部署在备集群(10.20.144.166)的配置
+#修改的配置如下
+endpoints:
+  master: 10.20.144.165:2379 #这里记得改
+  slave: 10.20.144.166:2379 #这里记得改
+configmap:
+  master_etcd_auth:
+    master_etcd_cacert: |-
+      -----BEGIN CERTIFICATE-----
+      MIIC0jCCAbqgAwIBAgIJAMwfu/lNu2u0MA0GCSqGSIb3DQEBCwUAMBUxEzARBgNV
+      BAMMCmt1YmVybmV0ZXMwIBcNMjIwNzI4MTMwMTE0WhgPMjEyMjA3MDQxMzAxMTRa
+      MBUxEzARBgNVBAMMCmt1YmVybmV0ZXMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAw
+      ggEKAoIBAQDRUwT/3nvR7GzpeyTEt5gMpwnaW3rtvaJjU8fGO/hak4HCu9TNTPZl
+      MYDDwBIHlhUiEgvxsuf4cyH2i5Ox/Fvho7mVWbzWIZxB1joFU3OmzSFNcmwgLmpJ
+      gRyrnYoyqf0GaI8ZlNAZKjEkQUQnT7RjutY22fEh8r/ObghTI9oUX9bSVb0IE7mC
+      No5ascoWadphRSnx9Lz6HAwphkF2aqkLU9QysPOc5muKNsk7B8u2X1d7QdC28QiF
+      h+iO6ZjQ/EchyxfjWO85wqlpxqbCY0vDXV+fh6wRQd2Xvp5X96Cyr3Ojy5C0VQ1H
+      h1DMwQpm6CYgPn4UzTIZKxV8LBSBFcrNAgMBAAGjIzAhMA8GA1UdEwEB/wQFMAMB
+      Af8wDgYDVR0PAQH/BAQDAgKkMA0GCSqGSIb3DQEBCwUAA4IBAQAGuYG4SNA4Pa16
+      qoGsQ/Sez6tbwYXyvOet90AEw4MWuKGmDrE2fjidR2NG9QwEyQYWiRfFuDJ5ZV5v
+      mSahHAB7z3Ak22qL/xUaOK3ef70UPJXxJ7xobRVDa6ZcPWbFHxsE7cglbKGnipQx
+      bs0g3BwLJ7EvKuwMNmYaGPrfdpAFDjasG8AIYbK3zJDGrLMC8DSfSXYtTMDlle1G
+      bYLh4CkmMjmyEMS0SMBGNoOFuUPQPJtoPxC6mHlDGfQBpDgMvpW4mcBafSf7pm0E
+      f74TxKrqO/296SIeQuQ68kgs/1sNr+NK9jJ7pRhFGgC1MApTyW/SL/7wL97ybP+U
+      aBJLRFAk
+      -----END CERTIFICATE-----
+    master_etcd_cert: |-
+      -----BEGIN CERTIFICATE-----
+      MIIDKDCCAhCgAwIBAgIJAM0yYExOnM6mMA0GCSqGSIb3DQEBCwUAMBUxEzARBgNV
+      BAMMCmt1YmVybmV0ZXMwIBcNMjIwNzI4MTMwMTI4WhgPMjEyMjA3MDQxMzAxMjha
+      MBExDzANBgNVBAMMBm1hc3RlcjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC
+      ggEBALpjwX6u/OGL8wovhYp9GsKbkl1FM2rGL+30dh5qRb0KXkUZA0iloNIzqqqP
+      CzwJt/a+1zHbSm37VdYCErwWfHr9rAKJqRKKLkNS25Ekotcuq5mF7DE6NdCyEFve
+      fZVmxIH1MS78bsVjnw8QGorTumUEWpM6iW+YdJy3sNztlQCxqx2aRjPp52W3FMCJ
+      GZQGLSKGoJT5cSJzVS4jWcMVA2QnBGZ7H1HJj9vUfm4ooahH4/Zwh8dQVHgl65pQ
+      GjlrrKzfOg8IESc6hxIYIC2X0+fNVRwWx6Y0KefhjM4JjVFn6ycHA7+DJrJT/7yh
+      tkvOm34fc0615a7KAXxSCTrSV0MCAwEAAaN9MHswCQYDVR0TBAIwADAOBgNVHQ8B
+      Af8EBAMCBaAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMD8GA1UdEQQ4
+      MDaCCWxvY2FsaG9zdIILaG9zdDE0NHgxNjWHBH8AAAGHEAAAAAAAAAAAAAAAAAAA
+      AAGHBAoUkKUwDQYJKoZIhvcNAQELBQADggEBANDJSHLL93KJV9gxXMHalDy2zPME
+      iUF2gRY4c6h36i1vB0wiZzo13BXMNBOlbwGEz9PEYxMuK7JjUVDCycTX4D9QLeyW
+      fx34iUh+MS94LdfK7uOAf1ZhGVaHYRhrGCMZEN+Ay0cEM7amaLw/TD2IpmuEx1V/
+      HgyYQVrLQb5kEpRNPZ3OV3epMaldcak1Hqa5UM/70KanzlTljzTZlgOGnCnuSEDw
+      W6Iyuis+VfMMQwGj9X0EC0nUw0ek1eEhy5aiBwlI1xIUILe8qZ2HBql36aKXNiv/
+      wXUnYjLA8Wrdb3J0KFhXNgorb3TOBfIVX3R/Reg2D4AHOAZA6EnNwiED6/I=
+      -----END CERTIFICATE-----
+    master_etcd_key: |-
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEowIBAAKCAQEAumPBfq784YvzCi+Fin0awpuSXUUzasYv7fR2HmpFvQpeRRkD
+      SKWg0jOqqo8LPAm39r7XMdtKbftV1gISvBZ8ev2sAompEoouQ1LbkSSi1y6rmYXs
+      MTo10LIQW959lWbEgfUxLvxuxWOfDxAaitO6ZQRakzqJb5h0nLew3O2VALGrHZpG
+      M+nnZbcUwIkZlAYtIoaglPlxInNVLiNZwxUDZCcEZnsfUcmP29R+biihqEfj9nCH
+      x1BUeCXrmlAaOWusrN86DwgRJzqHEhggLZfT581VHBbHpjQp5+GMzgmNUWfrJwcD
+      v4MmslP/vKG2S86bfh9zTrXlrsoBfFIJOtJXQwIDAQABAoIBAB9+r7l6VBzAiybT
+      dNs73IO5yfecs91886hfwH3PM02ILPm8CkQCSLR8KoB7f0h70+wLv00bYu5Go/Bv
+      lT7XBd26c5BSNpF9a+fQXm2eJS37It/kM072KRXEoOMFK29NWDMlfVQVL5qHBN+E
+      txdyQ3LCU5PBNmv29O1uVKJgOudM1ACnI1HTLxH9DwaJMQsKZaJHKtzvIV5UPoT8
+      MUf4S1QiUrmiA1bv6csiL72jYx1IQvYV0yI2KWs0SAe+DRDoacJDioGYKJvC52oL
+      FcioC79r7zMFT9PsnDS4TuwFHsIRcQf3b3aDGv329aMDL8gI6fA49mhDYedy2qNU
+      tTArC/ECgYEA8xjLMuQL16YbDEVQygVKajFRu4jsW9o1DDZbUrpLH/30ViXrBlHh
+      qNONMO1xSOXz+Dz1uh9MxRZnlmaZSa65bzOOVGrfIm/Ss1+J20Xm1P08I/kuzWeJ
+      OfYfWrGNgsekVGyzVQX4Hh7nWvQLA65JgqOQvXUJq+gU45YV3Df9iNcCgYEAxEhs
+      aWyo6t9enEGDrr+1aWqxMVTe13qxqqIAAt6WHzd2iG73FeFFDEXo01sCUlEpDkzD
+      r9WSM6rY18R441ZHSNT4BES3d/Ep5FHqDGmdMrYNXP2hIHO8FlWc8GeRedfZbqgB
+      3Fv/asDIDvA9H4/Fr+vruC4OMUvMgmihmiZ4+3UCgYA+AEXbLfSjRLdDUu5/CAhp
+      uzh4VzzJVIcRHU//coo0l6XYzwT5cKrYT1SEdRrel9+4oXuew9rlrYgwAOz5sPmU
+      lhaoCzXr549atnRHm7V6/zd2iVhZhR2nzdFDZWONRnPwIGVAuywEKqehN/sTLkGL
+      c0I4QAB+esvRG/dpWlJsswKBgCQ/l73UclGF1MwYkUAJaXBBYt3QZaL3pq3zYvsk
+      riavsHU7wOfKhVzh4ECAEyqukF1yscTcNTbTe15Fi2m4ekuqAO+Q3S0KXYkr04Rd
+      UMmXs1oUANikZvzc7LG8/rG4ug/keQt/9eh6F7gih7c3bvOxJwQJhVd3PxpqRkXY
+      iwktAoGBAJwWaBheJR13zVbjrsYKm1qC0MBJp+UoaHEL3Vn94ZWLpAfAiGewMaRM
+      iGpcAYpyBzcsCxEbeWSw87bHY1xDBXReqIOTwVxxL5yfW9WTlxPTsP1w6F1s63fN
+      agTb0whw38o6fUVYKrl+FdcefYjfV3FpXzY+OaB+m5fwNiUe4koy
+      -----END RSA PRIVATE KEY-----
+```
+
+同理，主集群需要部署etcd-mirror
+
+```
+#部署在备集群(10.20.144.165)的配置
+#修改的配置如下
+endpoints:
+  master: 10.20.144.166:2379 #这里记得改
+  slave: 10.20.144.165:2379 #这里记得改
+configmap:
+  master_etcd_auth:
+    master_etcd_cacert: |-
+      -----BEGIN CERTIFICATE-----
+      MIIC0jCCAbqgAwIBAgIJAJQ06oZuB1iOMA0GCSqGSIb3DQEBCwUAMBUxEzARBgNV
+      BAMMCmt1YmVybmV0ZXMwIBcNMjIwNzI4MTMyMjAyWhgPMjEyMjA3MDQxMzIyMDJa
+      MBUxEzARBgNVBAMMCmt1YmVybmV0ZXMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAw
+      ggEKAoIBAQDEKpyFWN1mNoPZICYvR4XWkh32bVuC5qu6MHtswVXRwGr4++RU2AuV
+      PDynEdZF5xnOZbQQRfCy/5TfB8mX9G9jkEs9kiNvnW+CD6RxULmHMiWxfl+Fs8dH
+      rvWACm22Iw/IwJhk/zYsISXTjR5UZ/K45w7p6H765Iyfl0/MXoPwZeZjlmvjLW6V
+      2lj1fPlEy9RkJtHB9xPn5rnRdnpflLHzNbf2o29uIOGpb2NwOajPCWI7hWkc5nA+
+      UELDw0UL+lhHzKm636H/iY5rNNB31ENCUEQ/zoxQ0h+8GKZUOyc/i9ryAobujeXo
+      Btp46g5UOaL8qqKQssmLDmiEFUf4M8cTAgMBAAGjIzAhMA8GA1UdEwEB/wQFMAMB
+      Af8wDgYDVR0PAQH/BAQDAgKkMA0GCSqGSIb3DQEBCwUAA4IBAQBtoi1q/DawwunJ
+      /NJLWGk6kXKr2d1xBXt+Cfc0n6lh3wHlSHrQ/ra+8zjBbB9X4L/C+Rj7331lz5PX
+      E7OldaYZOpMWNFHsW5CXmtm/dLcPfKOXvlTYAjm32ME7ZMF1HOp3xVwOot2hzStr
+      bvQKHHqGz2iY2moWQpwQkWbNm4Vy5tdMUOqKMNmLfzDho7Ohy3wCsRfwqgeolc3d
+      hSHvNzX8J0CjpCt3lTU8SVu0xkx+ETuSeO7UAEsPNY1v1S2HbI6yvUomKL+X0bGr
+      22v8w5juO22hSkiEVRPP9IcSlNHq1oWoPqaNVvYGT2cyLxgjUgD2WzYer3BysqPh
+      RHucvwGt
+      -----END CERTIFICATE-----
+    master_etcd_cert: |-
+      -----BEGIN CERTIFICATE-----
+      MIIDKDCCAhCgAwIBAgIJAKSsoesxUd52MA0GCSqGSIb3DQEBCwUAMBUxEzARBgNV
+      BAMMCmt1YmVybmV0ZXMwIBcNMjIwNzI4MTMyMjExWhgPMjEyMjA3MDQxMzIyMTFa
+      MBExDzANBgNVBAMMBm1hc3RlcjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC
+      ggEBAOtalljtm5o4Li+kUJSFFShN27zh38iX0FjyHGiEx1p5YVzX1Xg4yGbwAKKK
+      evQOa+9Rk2T5kU0ILhdkGmeSnf+MHYRKX+ia53cd+Dw0NVSNDv1ZIRJQfdf0NoQ7
+      R8WR6JmbKj4d6BPblJ7oFjBvkYIg/Pn34oyFuG0MlgYUIpsmzGw9p5bEZZ6xSSOk
+      BFYgxCaEpKuxXPwCJViwAfqjSdtrcubX/pCRKhoBkUe3fBL9Qi7CyABsxDw8vVNA
+      e3hLV3C8DvqWF59VdNHiX4+ysgBdKhMWRQA3a92HILSAjXvEQ+vz74hpHnJ4DmhZ
+      WwhBFuKJ4FGozn3i+vIp4f13NjsCAwEAAaN9MHswCQYDVR0TBAIwADAOBgNVHQ8B
+      Af8EBAMCBaAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMD8GA1UdEQQ4
+      MDaCCWxvY2FsaG9zdIILaG9zdDE0NHgxNjaHBH8AAAGHEAAAAAAAAAAAAAAAAAAA
+      AAGHBAoUkKYwDQYJKoZIhvcNAQELBQADggEBADgWAqZsB2BAcXn/tO+Rfg7Z8h5p
+      54u4+pJlYVQV5dyK1gL9W8Yh0WoOQAQ1OzaMkDdyZuzMm6ZRa/PmkoeuTVicaJTa
+      EAPxK/uGxhp5z+DavEpKIq62wss5NNoRkQ01tpLPAaOs35v2XvFV+ehWi2khOGTj
+      RJ1IiOQsVJYgI17PGKcJswjuR1wAUaRTAS76utErBcKnMEUlk4/1tBjG7ij3NXeg
+      r/Ea4EmCcoR2J/N6+GyEce53zQIZt0h4FL3TWMKaMthDECA7QWKAn7SzWDqccWZr
+      WrqIm6a76pHtJIPDmJS5n49KqBfjzE1KNHHMY+yjJSblN7pP9r93YZe9en0=
+      -----END CERTIFICATE-----
+    master_etcd_key: |-
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEpAIBAAKCAQEA61qWWO2bmjguL6RQlIUVKE3bvOHfyJfQWPIcaITHWnlhXNfV
+      eDjIZvAAoop69A5r71GTZPmRTQguF2QaZ5Kd/4wdhEpf6Jrndx34PDQ1VI0O/Vkh
+      ElB91/Q2hDtHxZHomZsqPh3oE9uUnugWMG+RgiD8+ffijIW4bQyWBhQimybMbD2n
+      lsRlnrFJI6QEViDEJoSkq7Fc/AIlWLAB+qNJ22ty5tf+kJEqGgGRR7d8Ev1CLsLI
+      AGzEPDy9U0B7eEtXcLwO+pYXn1V00eJfj7KyAF0qExZFADdr3YcgtICNe8RD6/Pv
+      iGkecngOaFlbCEEW4ongUajOfeL68inh/Xc2OwIDAQABAoIBAQDk7tASnsZeREnA
+      8/+iCLYk519YowpwcCQtcQzrKkVUn39ytUwjznA5mTm04ilpn2GkgGB0t0J8gPl8
+      rVX166ue+ad4mHQkqhF/T/q4bTx3C2NKU1mVHBDdcONayuMsrppoWIPFuoeWUWCH
+      FlEHOm96+iW57UNE14onITgJn6pt6XkdXyNlWqmK0sXrBQc5UA8dG0FEy/JdpR7a
+      pdBuJN/ILu53zmltOPv2/03nyVY7DaWVFN9wBvdeLx/yKXZz0REhdqszhsrKpXBd
+      JsM6DES3ymhyYo3HYv9VN/jiJ1TNVfbh47/oHOyaNLLYWEFpZk4pQ/mAMClDMku2
+      mdahDxMxAoGBAPg+77r5SZtq9W7j/tLRlJz/SXeF6cGypvks5ypI1sdIy8jtr4Mm
+      Z/Hy07Nw+XYgC2pnQk9IoqeSk+hd3nhgStODPtGmw3W4y4gKCZF6g4KUjzcstPoB
+      UnYQtM7rAbioyVbzFX/qCUfRv7Wq/joXRqQOgu0IuuzlF5VEpwyBjkbTAoGBAPK0
+      j9Tph5iztubzheCs43g9FFGGqrVnERR4lDxly6rDG2L2vbsBa6vUrrt6zwq67fP9
+      tGCGACiJZR4nBh8JycbhUXs1l52eNMdpZ2w+aXqSVMGvCPU2I9Ll+ZjcgEkEZRjh
+      hM8vnd3mWhvdYI0I3XkAjaCgyHsSxlFPcJ8fjIH5AoGABHsmWqqrUHniykilTero
+      ktjs25J4QL3X08Givpmn/trqisr3kxd7YtuuRJvydNZpPld00/eMsBeuQdCH9oZO
+      c3j4BlLLTnGygtcjixO6Ef5ag3V0ItspQOZWTTHiyxGI6N/kcHWqCzjXDBF1G1lW
+      Nhno9RxmO2Z7QX+GwGwKRG8CgYA+/W/K8WUY06OnoxJe8mADB88rLYlGlV5Qcs7+
+      Mek/A24rLCCn1UGNkiBbVg9AGK3DQlg7KOwHmUkeH0Cuc4rjy/yqvokABlxqWMfX
+      xwb3Id1Pe08W3RtFFBzIeInu6W4XnAgtAY22Vp+SVc1GLUPVsLgRNUly77d6yORQ
+      2A5OeQKBgQDAeET1cwMEAxNpoqvLgVw56BZakouRpUNHcajtltuFl4toBuTfciDN
+      b6y6x/+d4YbJZXUfxTFNY8EGHIvliIrhA8cJ5UMZtLx50MhOi5ZlNGsdoMinrLCU
+      3+WLK93XGfivPdQEs2GM6bFtIOlQU47YDl1hz+EGr/QPBbnjba8NsA==
+      -----END RSA PRIVATE KEY-----  
+  
+```
+
+### 部署etcd-mirror
+
+```
+helm install etcd-mirror . -n orca-system
+```
+
+
+# 下发ControllerFailOver
+
+备集群(10.20.144.166)下发ControllerFailOver
+
+```
+echo "
+apiVersion: failover.orcastack.io/v1alpha1
+kind: ControllerFailOver
+metadata:
+  namespace: orca-system
+  generateName: controller-failover-
+spec:
+  # 对应Cluster对象上的topology.kubernetes.io/zone标签 A就代表切换到A机房
+  primaryZone: A " > orca_text.yaml
+
+kubectl create -f orca_text.yaml
+rm -fr orca_text.yaml
+
+```
+
+执行命令
+
+```
+kubectl get deploy -A
+```
+
+部分工作负载replicas自动改为0,etcd-mirror工作负载为1，则集群已经互为主备
+
+```
+orca-system                 cluster-operator-controller-manager                  0/0     0            0           6d23h
+orca-system                 cluster-resource-operator-controller-manager         0/0     0            0           6d23h
+orca-system                 etcd-mirror                                          1/1     1            1           6d23h
+orca-system                 orca-logging-operator                                0/0     0            0           6d23h
+orca-system                 orcaapp-operator-controller-manager                  0/0     0            0           6d23h
+orca-system                 orcaapp-operator-server-manager                      0/0     0            0           6d23h
+orca-system                 tag-operator-controller-manager                      0/0     0            0           6d23h
+```
+
+# 主集群部署中间件
+中间件列表
+
+```
+mysql
+redis
+zookeeper
+kafka
+elasticsearch
+prometheus
+grafana
+logging
+```
+
+应用列表
+
+```
+hpa-demo
+```
+
+**应用及组件部署暂不做详细介绍**
+
+
+# 进行主备切换
+
+## 模拟主集群宕机
+
+所有主集群**每个节点**执行一下命令
+
+```
+# 关闭主集群
+systemctl stop docker && systemctl stop kubelet && systemctl stop etcd
+```
+
+登录备集群（10.20.144.166）superman账号
+
+等待**一分钟**左右，查看右上方**告警信息**（主集群已经宕机）
+
+## 下发主备切换配置
+
+```
+#备集群（10.20.144.166）执行
+echo "
+apiVersion: failover.orcastack.io/v1alpha1
+kind: ControllerFailOver
+metadata:
+  namespace: orca-system
+  generateName: controller-failover-
+spec:
+  # 对应Cluster对象上的topology.kubernetes.io/zone标签 B就代表切换到B机房
+  primaryZone: B " > orca_text.yaml
+kubectl create -f orca_text.yaml
+rm -fr orca_text.yaml
+```
+
+登录10.20.144.166集群界面 可以查看mysql kafka zookeeper在部署中，最终停在**部分运行**状态（es，跟redis不需要主备切换，不会重新下发配置）
+
+至此 10.20.144.166的组件实例pod已经从备切换为主。
+
+
+# 恢复主集群
+
+## 恢复主集群节点状态
+
+所有主集群**每个节点**执行一下命令
+
+```
+# 开启主集群
+systemctl start docker && systemctl start kubelet && systemctl start etcd
+```
+
+## 下发主集群恢复配置
+
+```
+#原来主集群（10.20.144.165）执行
+echo "
+apiVersion: failover.orcastack.io/v1alpha1
+kind: ControllerFailOver
+metadata:
+  namespace: orca-system
+  generateName: controller-failover-
+spec:
+  # 对应Cluster对象上的topology.kubernetes.io/zone标签 B就代表切换到B机房
+  primaryZone: B " > orca_text.yaml
+kubectl create -f orca_text.yaml
+rm -fr orca_text.yaml
+```
+
+## 等待中间件成功部署
+
+原主集群恢复后，app-operator会自动将10.20.144.165集群的中间件以slave方式拉起。
+
+## 等待中间件数据同步
+
+原主集群中间件自动从10.20.144.166上节点master同步数据。
