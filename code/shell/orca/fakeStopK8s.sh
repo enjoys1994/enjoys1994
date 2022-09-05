@@ -8,7 +8,8 @@ do
   spawn ssh root@${ip}
 
   expect {
-    \"continue\" {send \"yes\r\";exp_continue}
+    \"continue\" {send \"yes\r\";exp_cont
+    inue}
     \"password\" {send \"Test@orca\r\"}
   }
 
