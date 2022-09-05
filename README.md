@@ -13,7 +13,7 @@
   <img src="https://github.com/MikeCodesDotNET/ColoredBadges/raw/master/svg/dev/tools/bash.svg" alt="bash" style="max-width:100%;">
   <img src="https://github.com/MikeCodesDotNET/ColoredBadges/raw/master/svg/dev/services/kubernetes.svg" alt="kubernetes" style="max-width:100%;">
   <img src="https://github.com/MikeCodesDotNET/ColoredBadges/raw/master/svg/dev/tools/docker.svg" alt="docker" style="max-width:100%;">
-  <img src="https://github.com/MikeCodesDotNET/ColoredBadges/raw/master/svg/dev/tools/sass.svg" alt="docker" style="max-width:100%;">
+  <img src="https://github.com/MikeCodesDotNET/ColoredBadges/raw/master/svg/dev/languages/sass.svg" alt="docker" style="max-width:100%;">
 </p>
  
 <a href="https://github.com/wangguoyan">
