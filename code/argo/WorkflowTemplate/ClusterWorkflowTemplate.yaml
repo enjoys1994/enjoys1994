@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterWorkflowTemplate
+metadata:
+  name: cluster-workflow-template-whalesay-template
+spec:
+  templates:
+    - name: whalesay-template
+      inputs:
+        parameters:
+          - name: message
+      container:
+        image: docker/whalesay
+        command: [cowsay]
+        args: ["{{inputs.parameters.message}}"]
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: workflow-template-hello-world-
+spec:
+  entrypoint: whalesay
+  templates:
+    - name: whalesay
+      steps:
+        - - name: call-whalesay-template
+            templateRef:                  #引用模板
+              name: cluster-workflow-template-whalesay-template   # ClusterWorkflow名
+              template: whalesay-template # 具体的模板名
+              clusterScope: true          # 表示是ClusterWorkflow
+            arguments:                    #  参数
+              parameters:
+                - name: message
+                  value: "hello world"

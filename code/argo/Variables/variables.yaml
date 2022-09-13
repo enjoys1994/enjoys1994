@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: hello-world-parameters-
+spec:
+  entrypoint: whalesay
+  arguments:
+    parameters:
+      - name: message
+        value: hello world
+  templates:
+    - name: whalesay
+      inputs:
+        parameters:
+          - name: message
+      container:
+        image: docker/whalesay
+        command: [ cowsay ]
+        args: [ "{{inputs.parameters.message}}" ]
+#        filter：过滤
+#        asInt：转换为Int
+#        asFloat：转换为Float
+#        string：转换为String
+#        toJson：转换为Json
+#  filter([1, 2], { # > 1})
+#  asInt(inputs.parameters["my-int-param"])
+#  asFloat(inputs.parameters["my-float-param"])
+#  string(1)
+#  toJson([1, 2])

@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: workflow-template-1
+spec:
+  entrypoint: whalesay-template
+  arguments:
+    parameters:
+      - name: message
+        value: hello world
+  templates:
+    - name: whalesay-template
+      inputs:
+        parameters:
+          - name: message
+      container:
+        image: docker/whalesay
+        command: [cowsay]
+        args: ["{{inputs.parameters.message}}"]
+
+---
+
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: workflow-template-hello-world-
+spec:
+  entrypoint: whalesay
+  templates:
+    - name: whalesay
+      steps:                              # 引用模板必须在steps/dag/template下
+        - - name: call-whalesay-template
+            templateRef:                  # 应用模板字段
+              name: workflow-template-1   # WorkflowTemplate名
+              template: whalesay-template # 具体的template名
+            arguments:                    # 参数
+              parameters:
+                - name: message
+                  value: "hello world"
