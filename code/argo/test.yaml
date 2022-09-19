@@ -1,0 +1,117 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  annotations:
+    workflows.argoproj.io/description: |
+      orca install job
+    workflows.argoproj.io/maintainer: '@joker'
+    workflows.argoproj.io/tags: java, git
+    workflows.argoproj.io/version: '>= 2.9.0'
+  name: devops-java
+spec:
+  entrypoint: main
+  arguments:
+    parameters:
+      - name: repo
+        value: gitlab-test.coolops.cn/root/springboot-helloworld.git
+      - name: branch
+        value: master
+      - name: image
+        value: registry.cn-hangzhou.aliyuncs.com/rookieops/myapp:202103101613
+      - name: cache-image
+        value: registry.cn-hangzhou.aliyuncs.com/rookieops/myapp
+      - name: dockerfile
+        value: Dockerfile
+      - name: devops-cd-repo
+        value: gitlab-test.coolops.cn/root/devops-cd.git
+      - name: gitlabUsername
+        value: devops
+      - name: gitlabPassword
+        value: devops123456
+  templates:
+    - name: main
+      steps:
+        - - name: Checkout
+            template: Checkout
+        - - name: Build
+            template: Build
+        - - name: BuildImage
+            template: BuildImage
+        - - name: Deploy
+            template: Deploy
+    # 拉取代码
+    - name: Checkout
+      script:
+        image: registry.cn-hangzhou.aliyuncs.com/rookieops/maven:3.5.0-alpine
+        workingDir: /work
+        command:
+          - sh
+        source: |
+          git clone --branch {{workflow.parameters.branch}} http://{{workflow.parameters.gitlabUsername}}:{{workflow.parameters.gitlabPassword}}@{{workflow.parameters.repo}} .
+        volumeMounts:
+          - mountPath: /work
+            name: work
+    # 编译打包
+    - name: Build
+      script:
+        image: registry.cn-hangzhou.aliyuncs.com/rookieops/maven:3.5.0-alpine
+        workingDir: /work
+        command:
+          - sh
+        source: mvn -B clean package -Dmaven.test.skip=true -Dautoconfig.skip
+        volumeMounts:
+          - mountPath: /work
+            name: work
+    # 构建镜像
+    - name: BuildImage
+      volumes:
+        - name: docker-config
+          secret:
+            secretName: docker-config
+      container:
+        image: registry.cn-hangzhou.aliyuncs.com/rookieops/kaniko-executor:v1.5.0
+        workingDir: /work
+        args:
+          - --context=.
+          - --dockerfile={{workflow.parameters.dockerfile}}
+          - --destination={{workflow.parameters.image}}
+          - --skip-tls-verify
+          - --reproducible
+          - --cache=true
+          - --cache-repo={{workflow.parameters.cache-image}}
+        volumeMounts:
+          - mountPath: /work
+            name: work
+          - name: docker-config
+            mountPath: /kaniko/.docker/
+    # 部署
+    - name: Deploy
+      script:
+        image: registry.cn-hangzhou.aliyuncs.com/rookieops/kustomize:v3.8.1
+        workingDir: /work
+        command:
+          - sh
+        source: |
+          git remote set-url origin http://{{workflow.parameters.gitlabUsername}}:{{workflow.parameters.gitlabPassword}}@{{workflow.parameters.devops-cd-repo}} 
+          git config --global user.name "Administrator" 
+          git config --global user.email "coolops@163.com" 
+          git clone http://{{workflow.parameters.gitlabUsername}}:{{workflow.parameters.gitlabPassword}}@{{workflow.parameters.devops-cd-repo}} /work/devops-cd 
+          cd /work/devops-cd 
+          git pull 
+          cd /work/devops-cd/devops-simple-java 
+          kustomize edit set image {{workflow.parameters.image}} 
+          git commit -am 'image update' 
+          git push origin master
+        volumeMounts:
+          - mountPath: /work
+            name: work
+  volumeClaimTemplates:
+    - name: work
+      metadata:
+        name: work
+      spec:
+        storageClassName: nfs-client-storageclass
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi

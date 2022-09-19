@@ -1,0 +1,5 @@
+- hosts: all
+  remote_user: root
+  tasks:
+    - name: copy file
+      copy: src=/Users/stt/Desktop/wgy/workspace/go/orca-installation-yamls dest=/home/wgy

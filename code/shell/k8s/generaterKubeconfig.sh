@@ -23,3 +23,7 @@ kubectl config use-context $context --kubeconfig=$kubeconfig.conf
 cat $kubeconfig.conf
 
 rm -fr $kubeconfig.conf
+
+
+
+
