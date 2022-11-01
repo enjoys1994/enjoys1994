@@ -8,14 +8,13 @@ do
   spawn ssh root@${ip}
 
   expect {
-    \"continue\" {send \"yes\r\";exp_cont
-    inue}
-    \"password\" {send \"Test@orca\r\"}
+    \"continue\" {send \"yes\r\";exp_continue}
+    \"password\" {send \"Test@orca\r\";exp_continue}
+    \"login\"    {send \"systemctl stop docker && systemctl stop kubelet && systemctl stop etcd && exit \r\";exp_continue}
+    \"etcd\"   {send \" exit \r\"}
   }
-
-  expect \"login\"
-  send \"systemctl stop docker && systemctl stop kubelet && systemctl stop etcd && exit \r\"
 
   expect eof
   "
 done
+
