@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    control-plane: orca-etcd-mirror
+  name: etcd-mirror-service-clusterip
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+  - port: 10520
+    targetPort: 10520
+  selector:
+    control-plane: orca-etcd-mirror

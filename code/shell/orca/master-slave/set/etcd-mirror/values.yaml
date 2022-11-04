@@ -1,0 +1,194 @@
+# Default values for etcd-mirror.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+global:
+  priorityClassName: "orca-high-priority"
+  orcaRegistry: registry.kubeoperator.io:8083
+  privateRegistry:
+    #registryUrl: package.hundsun.com/orca1.0-docker-test-local
+    registryUrl: ~
+    registryUser: ~
+    registryPasswd: ~
+replicaCount: 0
+
+image:
+  repository: orca/etcd-mirror
+  tag: "08031835"
+  pullPolicy: IfNotPresent
+
+terminationGracePeriodSeconds: 10
+
+endpoints:
+  master: 10.20.144.165:2379
+  slave: 10.20.144.166:2379
+
+env:
+  ETCDCTL_API: "3"
+
+volumesPaths:
+  auth:
+    slave:
+      cacert: /etc/kubernetes/pki/etcd/ca.crt
+      cert: /etc/kubernetes/pki/etcd/server.crt
+      key: /etc/kubernetes/pki/etcd/server.key
+  encryption:
+    slave:
+      path: /etc/kubernetes/pki/secrets-encryption.yaml
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1000Mi
+  requests:
+    cpu: 200m
+    memory: 128Mi
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: node-role.kubernetes.io/etcd
+              operator: Exists
+
+configmap:
+  master_etcd_auth:
+    name: master-etcd-auth
+    master_etcd_cacert: |-
+      -----BEGIN CERTIFICATE-----
+      MIIC0jCCAbqgAwIBAgIJAMwfu/lNu2u0MA0GCSqGSIb3DQEBCwUAMBUxEzARBgNV
+      BAMMCmt1YmVybmV0ZXMwIBcNMjIwNzI4MTMwMTE0WhgPMjEyMjA3MDQxMzAxMTRa
+      MBUxEzARBgNVBAMMCmt1YmVybmV0ZXMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAw
+      ggEKAoIBAQDRUwT/3nvR7GzpeyTEt5gMpwnaW3rtvaJjU8fGO/hak4HCu9TNTPZl
+      MYDDwBIHlhUiEgvxsuf4cyH2i5Ox/Fvho7mVWbzWIZxB1joFU3OmzSFNcmwgLmpJ
+      gRyrnYoyqf0GaI8ZlNAZKjEkQUQnT7RjutY22fEh8r/ObghTI9oUX9bSVb0IE7mC
+      No5ascoWadphRSnx9Lz6HAwphkF2aqkLU9QysPOc5muKNsk7B8u2X1d7QdC28QiF
+      h+iO6ZjQ/EchyxfjWO85wqlpxqbCY0vDXV+fh6wRQd2Xvp5X96Cyr3Ojy5C0VQ1H
+      h1DMwQpm6CYgPn4UzTIZKxV8LBSBFcrNAgMBAAGjIzAhMA8GA1UdEwEB/wQFMAMB
+      Af8wDgYDVR0PAQH/BAQDAgKkMA0GCSqGSIb3DQEBCwUAA4IBAQAGuYG4SNA4Pa16
+      qoGsQ/Sez6tbwYXyvOet90AEw4MWuKGmDrE2fjidR2NG9QwEyQYWiRfFuDJ5ZV5v
+      mSahHAB7z3Ak22qL/xUaOK3ef70UPJXxJ7xobRVDa6ZcPWbFHxsE7cglbKGnipQx
+      bs0g3BwLJ7EvKuwMNmYaGPrfdpAFDjasG8AIYbK3zJDGrLMC8DSfSXYtTMDlle1G
+      bYLh4CkmMjmyEMS0SMBGNoOFuUPQPJtoPxC6mHlDGfQBpDgMvpW4mcBafSf7pm0E
+      f74TxKrqO/296SIeQuQ68kgs/1sNr+NK9jJ7pRhFGgC1MApTyW/SL/7wL97ybP+U
+      aBJLRFAk
+      -----END CERTIFICATE-----
+      -----BEGIN CERTIFICATE-----
+      MIIC0jCCAbqgAwIBAgIJAMwfu/lNu2u0MA0GCSqGSIb3DQEBCwUAMBUxEzARBgNV
+      BAMMCmt1YmVybmV0ZXMwIBcNMjIwNzI4MTMwMTE0WhgPMjEyMjA3MDQxMzAxMTRa
+      MBUxEzARBgNVBAMMCmt1YmVybmV0ZXMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAw
+      ggEKAoIBAQDRUwT/3nvR7GzpeyTEt5gMpwnaW3rtvaJjU8fGO/hak4HCu9TNTPZl
+      MYDDwBIHlhUiEgvxsuf4cyH2i5Ox/Fvho7mVWbzWIZxB1joFU3OmzSFNcmwgLmpJ
+      gRyrnYoyqf0GaI8ZlNAZKjEkQUQnT7RjutY22fEh8r/ObghTI9oUX9bSVb0IE7mC
+      No5ascoWadphRSnx9Lz6HAwphkF2aqkLU9QysPOc5muKNsk7B8u2X1d7QdC28QiF
+      h+iO6ZjQ/EchyxfjWO85wqlpxqbCY0vDXV+fh6wRQd2Xvp5X96Cyr3Ojy5C0VQ1H
+      h1DMwQpm6CYgPn4UzTIZKxV8LBSBFcrNAgMBAAGjIzAhMA8GA1UdEwEB/wQFMAMB
+      Af8wDgYDVR0PAQH/BAQDAgKkMA0GCSqGSIb3DQEBCwUAA4IBAQAGuYG4SNA4Pa16
+      qoGsQ/Sez6tbwYXyvOet90AEw4MWuKGmDrE2fjidR2NG9QwEyQYWiRfFuDJ5ZV5v
+      mSahHAB7z3Ak22qL/xUaOK3ef70UPJXxJ7xobRVDa6ZcPWbFHxsE7cglbKGnipQx
+      bs0g3BwLJ7EvKuwMNmYaGPrfdpAFDjasG8AIYbK3zJDGrLMC8DSfSXYtTMDlle1G
+      bYLh4CkmMjmyEMS0SMBGNoOFuUPQPJtoPxC6mHlDGfQBpDgMvpW4mcBafSf7pm0E
+      f74TxKrqO/296SIeQuQ68kgs/1sNr+NK9jJ7pRhFGgC1MApTyW/SL/7wL97ybP+U
+      aBJLRFAk
+      -----END CERTIFICATE-----
+    master_etcd_cert: |-
+      -----BEGIN CERTIFICATE-----
+      MIIDKDCCAhCgAwIBAgIJAM0yYExOnM6mMA0GCSqGSIb3DQEBCwUAMBUxEzARBgNV
+      BAMMCmt1YmVybmV0ZXMwIBcNMjIwNzI4MTMwMTI4WhgPMjEyMjA3MDQxMzAxMjha
+      MBExDzANBgNVBAMMBm1hc3RlcjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC
+      ggEBALpjwX6u/OGL8wovhYp9GsKbkl1FM2rGL+30dh5qRb0KXkUZA0iloNIzqqqP
+      CzwJt/a+1zHbSm37VdYCErwWfHr9rAKJqRKKLkNS25Ekotcuq5mF7DE6NdCyEFve
+      fZVmxIH1MS78bsVjnw8QGorTumUEWpM6iW+YdJy3sNztlQCxqx2aRjPp52W3FMCJ
+      GZQGLSKGoJT5cSJzVS4jWcMVA2QnBGZ7H1HJj9vUfm4ooahH4/Zwh8dQVHgl65pQ
+      GjlrrKzfOg8IESc6hxIYIC2X0+fNVRwWx6Y0KefhjM4JjVFn6ycHA7+DJrJT/7yh
+      tkvOm34fc0615a7KAXxSCTrSV0MCAwEAAaN9MHswCQYDVR0TBAIwADAOBgNVHQ8B
+      Af8EBAMCBaAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMD8GA1UdEQQ4
+      MDaCCWxvY2FsaG9zdIILaG9zdDE0NHgxNjWHBH8AAAGHEAAAAAAAAAAAAAAAAAAA
+      AAGHBAoUkKUwDQYJKoZIhvcNAQELBQADggEBANDJSHLL93KJV9gxXMHalDy2zPME
+      iUF2gRY4c6h36i1vB0wiZzo13BXMNBOlbwGEz9PEYxMuK7JjUVDCycTX4D9QLeyW
+      fx34iUh+MS94LdfK7uOAf1ZhGVaHYRhrGCMZEN+Ay0cEM7amaLw/TD2IpmuEx1V/
+      HgyYQVrLQb5kEpRNPZ3OV3epMaldcak1Hqa5UM/70KanzlTljzTZlgOGnCnuSEDw
+      W6Iyuis+VfMMQwGj9X0EC0nUw0ek1eEhy5aiBwlI1xIUILe8qZ2HBql36aKXNiv/
+      wXUnYjLA8Wrdb3J0KFhXNgorb3TOBfIVX3R/Reg2D4AHOAZA6EnNwiED6/I=
+      -----END CERTIFICATE-----
+      -----BEGIN CERTIFICATE-----
+      MIIDKDCCAhCgAwIBAgIJAM0yYExOnM6mMA0GCSqGSIb3DQEBCwUAMBUxEzARBgNV
+      BAMMCmt1YmVybmV0ZXMwIBcNMjIwNzI4MTMwMTI4WhgPMjEyMjA3MDQxMzAxMjha
+      MBExDzANBgNVBAMMBm1hc3RlcjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC
+      ggEBALpjwX6u/OGL8wovhYp9GsKbkl1FM2rGL+30dh5qRb0KXkUZA0iloNIzqqqP
+      CzwJt/a+1zHbSm37VdYCErwWfHr9rAKJqRKKLkNS25Ekotcuq5mF7DE6NdCyEFve
+      fZVmxIH1MS78bsVjnw8QGorTumUEWpM6iW+YdJy3sNztlQCxqx2aRjPp52W3FMCJ
+      GZQGLSKGoJT5cSJzVS4jWcMVA2QnBGZ7H1HJj9vUfm4ooahH4/Zwh8dQVHgl65pQ
+      GjlrrKzfOg8IESc6hxIYIC2X0+fNVRwWx6Y0KefhjM4JjVFn6ycHA7+DJrJT/7yh
+      tkvOm34fc0615a7KAXxSCTrSV0MCAwEAAaN9MHswCQYDVR0TBAIwADAOBgNVHQ8B
+      Af8EBAMCBaAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMD8GA1UdEQQ4
+      MDaCCWxvY2FsaG9zdIILaG9zdDE0NHgxNjWHBH8AAAGHEAAAAAAAAAAAAAAAAAAA
+      AAGHBAoUkKUwDQYJKoZIhvcNAQELBQADggEBANDJSHLL93KJV9gxXMHalDy2zPME
+      iUF2gRY4c6h36i1vB0wiZzo13BXMNBOlbwGEz9PEYxMuK7JjUVDCycTX4D9QLeyW
+      fx34iUh+MS94LdfK7uOAf1ZhGVaHYRhrGCMZEN+Ay0cEM7amaLw/TD2IpmuEx1V/
+      HgyYQVrLQb5kEpRNPZ3OV3epMaldcak1Hqa5UM/70KanzlTljzTZlgOGnCnuSEDw
+      W6Iyuis+VfMMQwGj9X0EC0nUw0ek1eEhy5aiBwlI1xIUILe8qZ2HBql36aKXNiv/
+      wXUnYjLA8Wrdb3J0KFhXNgorb3TOBfIVX3R/Reg2D4AHOAZA6EnNwiED6/I=
+      -----END CERTIFICATE-----
+    master_etcd_key: |-
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEowIBAAKCAQEAumPBfq784YvzCi+Fin0awpuSXUUzasYv7fR2HmpFvQpeRRkD
+      SKWg0jOqqo8LPAm39r7XMdtKbftV1gISvBZ8ev2sAompEoouQ1LbkSSi1y6rmYXs
+      MTo10LIQW959lWbEgfUxLvxuxWOfDxAaitO6ZQRakzqJb5h0nLew3O2VALGrHZpG
+      M+nnZbcUwIkZlAYtIoaglPlxInNVLiNZwxUDZCcEZnsfUcmP29R+biihqEfj9nCH
+      x1BUeCXrmlAaOWusrN86DwgRJzqHEhggLZfT581VHBbHpjQp5+GMzgmNUWfrJwcD
+      v4MmslP/vKG2S86bfh9zTrXlrsoBfFIJOtJXQwIDAQABAoIBAB9+r7l6VBzAiybT
+      dNs73IO5yfecs91886hfwH3PM02ILPm8CkQCSLR8KoB7f0h70+wLv00bYu5Go/Bv
+      lT7XBd26c5BSNpF9a+fQXm2eJS37It/kM072KRXEoOMFK29NWDMlfVQVL5qHBN+E
+      txdyQ3LCU5PBNmv29O1uVKJgOudM1ACnI1HTLxH9DwaJMQsKZaJHKtzvIV5UPoT8
+      MUf4S1QiUrmiA1bv6csiL72jYx1IQvYV0yI2KWs0SAe+DRDoacJDioGYKJvC52oL
+      FcioC79r7zMFT9PsnDS4TuwFHsIRcQf3b3aDGv329aMDL8gI6fA49mhDYedy2qNU
+      tTArC/ECgYEA8xjLMuQL16YbDEVQygVKajFRu4jsW9o1DDZbUrpLH/30ViXrBlHh
+      qNONMO1xSOXz+Dz1uh9MxRZnlmaZSa65bzOOVGrfIm/Ss1+J20Xm1P08I/kuzWeJ
+      OfYfWrGNgsekVGyzVQX4Hh7nWvQLA65JgqOQvXUJq+gU45YV3Df9iNcCgYEAxEhs
+      aWyo6t9enEGDrr+1aWqxMVTe13qxqqIAAt6WHzd2iG73FeFFDEXo01sCUlEpDkzD
+      r9WSM6rY18R441ZHSNT4BES3d/Ep5FHqDGmdMrYNXP2hIHO8FlWc8GeRedfZbqgB
+      3Fv/asDIDvA9H4/Fr+vruC4OMUvMgmihmiZ4+3UCgYA+AEXbLfSjRLdDUu5/CAhp
+      uzh4VzzJVIcRHU//coo0l6XYzwT5cKrYT1SEdRrel9+4oXuew9rlrYgwAOz5sPmU
+      lhaoCzXr549atnRHm7V6/zd2iVhZhR2nzdFDZWONRnPwIGVAuywEKqehN/sTLkGL
+      c0I4QAB+esvRG/dpWlJsswKBgCQ/l73UclGF1MwYkUAJaXBBYt3QZaL3pq3zYvsk
+      riavsHU7wOfKhVzh4ECAEyqukF1yscTcNTbTe15Fi2m4ekuqAO+Q3S0KXYkr04Rd
+      UMmXs1oUANikZvzc7LG8/rG4ug/keQt/9eh6F7gih7c3bvOxJwQJhVd3PxpqRkXY
+      iwktAoGBAJwWaBheJR13zVbjrsYKm1qC0MBJp+UoaHEL3Vn94ZWLpAfAiGewMaRM
+      iGpcAYpyBzcsCxEbeWSw87bHY1xDBXReqIOTwVxxL5yfW9WTlxPTsP1w6F1s63fN
+      agTb0whw38o6fUVYKrl+FdcefYjfV3FpXzY+OaB+m5fwNiUe4koy
+      -----END RSA PRIVATE KEY-----
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEowIBAAKCAQEAumPBfq784YvzCi+Fin0awpuSXUUzasYv7fR2HmpFvQpeRRkD
+      SKWg0jOqqo8LPAm39r7XMdtKbftV1gISvBZ8ev2sAompEoouQ1LbkSSi1y6rmYXs
+      MTo10LIQW959lWbEgfUxLvxuxWOfDxAaitO6ZQRakzqJb5h0nLew3O2VALGrHZpG
+      M+nnZbcUwIkZlAYtIoaglPlxInNVLiNZwxUDZCcEZnsfUcmP29R+biihqEfj9nCH
+      x1BUeCXrmlAaOWusrN86DwgRJzqHEhggLZfT581VHBbHpjQp5+GMzgmNUWfrJwcD
+      v4MmslP/vKG2S86bfh9zTrXlrsoBfFIJOtJXQwIDAQABAoIBAB9+r7l6VBzAiybT
+      dNs73IO5yfecs91886hfwH3PM02ILPm8CkQCSLR8KoB7f0h70+wLv00bYu5Go/Bv
+      lT7XBd26c5BSNpF9a+fQXm2eJS37It/kM072KRXEoOMFK29NWDMlfVQVL5qHBN+E
+      txdyQ3LCU5PBNmv29O1uVKJgOudM1ACnI1HTLxH9DwaJMQsKZaJHKtzvIV5UPoT8
+      MUf4S1QiUrmiA1bv6csiL72jYx1IQvYV0yI2KWs0SAe+DRDoacJDioGYKJvC52oL
+      FcioC79r7zMFT9PsnDS4TuwFHsIRcQf3b3aDGv329aMDL8gI6fA49mhDYedy2qNU
+      tTArC/ECgYEA8xjLMuQL16YbDEVQygVKajFRu4jsW9o1DDZbUrpLH/30ViXrBlHh
+      qNONMO1xSOXz+Dz1uh9MxRZnlmaZSa65bzOOVGrfIm/Ss1+J20Xm1P08I/kuzWeJ
+      OfYfWrGNgsekVGyzVQX4Hh7nWvQLA65JgqOQvXUJq+gU45YV3Df9iNcCgYEAxEhs
+      aWyo6t9enEGDrr+1aWqxMVTe13qxqqIAAt6WHzd2iG73FeFFDEXo01sCUlEpDkzD
+      r9WSM6rY18R441ZHSNT4BES3d/Ep5FHqDGmdMrYNXP2hIHO8FlWc8GeRedfZbqgB
+      3Fv/asDIDvA9H4/Fr+vruC4OMUvMgmihmiZ4+3UCgYA+AEXbLfSjRLdDUu5/CAhp
+      uzh4VzzJVIcRHU//coo0l6XYzwT5cKrYT1SEdRrel9+4oXuew9rlrYgwAOz5sPmU
+      lhaoCzXr549atnRHm7V6/zd2iVhZhR2nzdFDZWONRnPwIGVAuywEKqehN/sTLkGL
+      c0I4QAB+esvRG/dpWlJsswKBgCQ/l73UclGF1MwYkUAJaXBBYt3QZaL3pq3zYvsk
+      riavsHU7wOfKhVzh4ECAEyqukF1yscTcNTbTe15Fi2m4ekuqAO+Q3S0KXYkr04Rd
+      UMmXs1oUANikZvzc7LG8/rG4ug/keQt/9eh6F7gih7c3bvOxJwQJhVd3PxpqRkXY
+      iwktAoGBAJwWaBheJR13zVbjrsYKm1qC0MBJp+UoaHEL3Vn94ZWLpAfAiGewMaRM
+      iGpcAYpyBzcsCxEbeWSw87bHY1xDBXReqIOTwVxxL5yfW9WTlxPTsP1w6F1s63fN
+      agTb0whw38o6fUVYKrl+FdcefYjfV3FpXzY+OaB+m5fwNiUe4koy
+      -----END RSA PRIVATE KEY-----
+    # 请勿编辑一下子etcd的值
+    master_etcd_cacert_default: |-
+    master_etcd_cert_default: |-
+    master_etcd_key_default: |-
+  mirror_rules:
+    name: mirror-rules

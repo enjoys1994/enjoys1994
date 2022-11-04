@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+  {{- if (include "etcd-mirror.endpoints.master" .) }}
+    master_endpoints: {{ template "etcd-mirror.endpoints.master" . }}
+  {{- end }}
+  {{- if (include "etcd-mirror.endpoints.slave" .) }}
+    slave_endpoints: {{ template "etcd-mirror.endpoints.slave" . }}
+  {{- end }}
+  name: {{ include "etcd-mirror.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    control-plane: orca-etcd-mirror
+    failover.orcastack.io/secondary-controller: only
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      control-plane: orca-etcd-mirror
+  template:
+    metadata:
+      labels:
+        control-plane: orca-etcd-mirror
+    spec:
+      {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName | quote }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ template "registry_url" . }}{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /etcd-mirror
+          args:
+            - {{ template "etcd-mirror.endpoints.slave" . }}
+            - --endpoints={{ template "etcd-mirror.endpoints.master" . }}
+            - --cacert=/etc/kubernetes/master/etcd/ca.crt
+            - --cert=/etc/kubernetes/master/etcd/server.crt
+            - --key=/etc/kubernetes/master/etcd/server.key
+            - --dest-cacert=/etc/kubernetes/slave/etcd/ca.crt
+            - --dest-cert=/etc/kubernetes/slave/etcd/server.crt
+            - --dest-key=/etc/kubernetes/slave/etcd/server.key
+            - --mirror-rule=/etc/mirror/rules.yaml
+            - --encryption-provider-config=/etc/mirror/secrets-encryption.yaml
+          env:
+            - name: ETCDCTL_API
+              value: {{ .Values.env.ETCDCTL_API | quote }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /etc/kubernetes/master/etcd
+              name: master-etcd-auth
+              readOnly: true
+            - mountPath: /etc/kubernetes/slave/etcd/ca.crt
+              name: slave-etcd-cacert
+              readOnly: true
+            - mountPath: /etc/kubernetes/slave/etcd/server.crt
+              name: slave-etcd-cert
+              readOnly: true
+            - mountPath: /etc/kubernetes/slave/etcd/server.key
+              name: slave-etcd-key
+              readOnly: true
+            - mountPath: /etc/mirror/secrets-encryption.yaml
+              name: secrets-encryption
+              readOnly: true
+            - mountPath: /etc/mirror/rules.yaml
+              name: rules
+              subPath: rules.yaml
+            - mountPath: /etc/localtime
+              name: lt-config
+            - mountPath: /etc/timezone
+              name: tz-config
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      terminationGracePeriodSeconds: 10
+      volumes:
+        - name: master-etcd-auth
+          configMap:
+            name: {{ .Values.configmap.master_etcd_auth.name }}
+        - name: slave-etcd-cacert
+          hostPath:
+            path: {{ .Values.volumesPaths.auth.slave.cacert }}
+        - name: slave-etcd-cert
+          hostPath:
+            path: {{ .Values.volumesPaths.auth.slave.cert }}
+        - name: slave-etcd-key
+          hostPath:
+            path: {{ .Values.volumesPaths.auth.slave.key }}
+        - name: secrets-encryption
+          hostPath:
+            path: {{ .Values.volumesPaths.encryption.slave.path }}
+        - name: rules
+          configMap:
+            name: mirror-rules
+        - name: lt-config
+          hostPath:
+            path: /etc/localtime
+        - name: tz-config
+          hostPath:
+            path: /etc/timezone
