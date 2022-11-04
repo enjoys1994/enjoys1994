@@ -16,9 +16,4 @@ sudo ./configure && sudo  make && sudo make install
 cd /usr/local/src/expect5.45/
 sudo ./configure --with-tclinclude=/usr/local/src/tcl8.4.19/generic/ --with-tclconfig=/usr/local/lib/ && sudo make && sudo make install
 
-#上传镜像
 
-
-
-#复制二进制
-#cp expect /usr/bin
