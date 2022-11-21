@@ -4,7 +4,7 @@
 
 cd base
 #复制二进制
-sh installExpect.sh
+sh moveExpect.sh
 
 sh resethost.sh
 #上传镜像

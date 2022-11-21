@@ -1,8 +1,28 @@
-#version=Light-Core1.0V202209.00.000
+#!/usr/bash
+
+set -x
+set -e
+go mod tidy
+
+echo '
+FROM package.hundsun.com/orca1.0-docker-release-local/orca/alpine:3.13.5 as builder
+
+WORKDIR /workspace
+COPY . .
+
+RUN chmod +x /workspace/bin/app-operator
+
+
+FROM package.hundsun.com/orca1.0-docker-release-local/orca/alpine:3.13.5
+
+WORKDIR /
+COPY --from=builder /workspace/bin/app-operator .
+
+CMD ["app-operator"]
+'> Dockerfile.wgy
+
 version=feature-wgy
 tag=${version}-$(date +%Y%m%d%H%M%S)
-
-go mod tidy
 
 rm -fr bin/app-operator
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o bin/app-operator main.go
@@ -22,11 +42,10 @@ if [ $? -ne 0 ]; then
 fi
 
 rm -fr bin
+rm -fr Dockerfile.wgy
 
 docker manifest create ${IMG} ${IMG}-arm64 ${IMG}-amd64
 docker manifest push ${IMG}
-docker rmi ${IMG}-arm64
-docker rmi ${IMG}-amd64
 
 cd ../
 cd orca-installation-yamls/orca-all-in-one
