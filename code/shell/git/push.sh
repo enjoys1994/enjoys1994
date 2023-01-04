@@ -1,5 +1,5 @@
 
-#sh /Users/stt/Desktop/wgy/workspace/go/wangguoyan/code/shell/git/push.sh
+# sh /Users/stt/Desktop/wgy/workspace/go/wangguoyan/code/shell/git/push.sh
 
 
 git config --global http.proxy 127.0.0.1:15236
