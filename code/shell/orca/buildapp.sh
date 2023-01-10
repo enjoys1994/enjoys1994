@@ -48,5 +48,7 @@ echo $newVersion
 str="s/${oldVersion}/$newVersion/g"
 sed -ig $str values.yaml && rm -fr values.yamlg || exit
 
+echo ${IMG}
+
 sh /Users/stt/Desktop/wgy/workspace/go/wangguoyan/code/shell/orca/rsync.sh $1
 
