@@ -3,7 +3,7 @@
 set -x
 set -e
 
-version=Light-Core1.0V202301.00.000
+version=feature-wgy
 tag=${version}-$(date +%Y%m%d%H%M%S)
 IMG=package.hundsun.com/orca1.0-docker-test-local/orca/app-operator:${tag}
 
@@ -28,9 +28,14 @@ CMD ["app-operator"]
 ' >Dockerfile.wgy
 
 rm -fr bin/app-operator && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o bin/app-operator main.go &&
-  docker buildx build -f=Dockerfile.wgy --platform=linux/amd64 --tag=${IMG} --push . || exit
+  docker buildx build -f=Dockerfile.wgy --platform=linux/amd64 --tag=${IMG}-amd64 --push . || exit
+
+rm -fr bin/app-operator && CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -o bin/app-operator main.go &&
+  docker buildx build -f=Dockerfile.wgy --platform=linux/arm64 --tag=${IMG}-arm64 --push . || exit
 
 rm -fr bin && rm -fr Dockerfile.wgy
+
+docker manifest create ${IMG} ${IMG}-arm64 ${IMG}-amd64 && docker manifest push ${IMG} || exit
 
 cd /Users/stt/Desktop/wgy/workspace/go/orca-installation-yamls/orca-all-in-one && git restore values.yaml &&
   git pull || exit
@@ -46,6 +51,4 @@ sed -ig $str values.yaml && rm -fr values.yamlg || exit
 echo ${IMG}
 
 sh /Users/stt/Desktop/wgy/workspace/go/wangguoyan/code/shell/orca/rsync.sh $1
-
-#  app.orcastack.io/app-id: 8d2f8c9d-7be2-47bf-963d-5e81507dfd19
 
