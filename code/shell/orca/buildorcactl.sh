@@ -33,7 +33,10 @@ rm -fr bin && rm -fr Dockerfile.wgy
 
 docker manifest create ${IMG} ${IMG}-arm64 ${IMG}-amd64 && docker manifest push ${IMG} || exit
 
-cd ../orca-installation-yamls/orca-all-in-one && git pull || exit
+
+cd /Users/stt/Desktop/wgy/workspace/go/orca-installation-yamls/orca-all-in-one &&
+#git restore values.yaml &&
+  git pull || exit
 
 oldVersion=$(cat values.yaml | grep 'orca/orcactl' -A1 | grep version | awk -F '"' '{print $2}')
 newVersion=$tag

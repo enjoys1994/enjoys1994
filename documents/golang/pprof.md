@@ -1,6 +1,9 @@
 ## memory profiling主要查看程序当前活动对象内存分配
 
 ```
+
+go tool pprof http://localhost:57617/debug/pprof/profile
+
 http://localhost:8082/debug/pprof/ ：获取概况信息，即图一的信息
 go tool pprof http://localhost:8082/debug/pprof/allocs : 分析内存分配
 go tool pprof http://localhost:8082/debug/pprof/block : 分析堆栈跟踪导致阻塞的同步原语
@@ -14,3 +17,6 @@ go tool pprof http://localhost:8082/debug/pprof/trace : 分析追踪当前程序
 ```
 
 https://zhuanlan.zhihu.com/p/371713134
+
+go tool pprof -http localhost:3001 /Users/stt/pprof/pprof.app-operator.samples.cpu.004.pb.gz
+

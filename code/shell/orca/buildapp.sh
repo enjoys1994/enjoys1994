@@ -3,7 +3,7 @@
 set -x
 set -e
 
-version=Light-Core1.0V202301.00.000
+version=Light-Core1.0V202303.00.000
 tag=${version}-$(date +%Y%m%d%H%M%S)
 IMG=package.hundsun.com/orca1.0-docker-test-local/orca/app-operator:${tag}
 
