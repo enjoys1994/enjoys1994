@@ -1,6 +1,6 @@
 
 
-# sh /Users/wgy/Downloads/work/wangguoyan/code/shell/git/pull.sh
+#sh /Users/wgy/Downloads/work/wangguoyan/code/shell/git/pull.sh
 #./pull.sh
 
 git config --global http.proxy 127.0.0.1:15236

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="Spring" name="Spring">
+      <configuration />
+    </facet>
+  </component>
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
+    <output url="file://$MODULE_DIR$/target/classes" />
+    <output-test url="file://$MODULE_DIR$/target/test-classes" />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-context:5.3.27" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-aop:5.3.27" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-beans:5.3.27" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-core:5.3.27" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-jcl:5.3.27" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-expression:5.3.27" level="project" />
+    <orderEntry type="library" name="Maven: org.drools:drools-compiler:7.62.0.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.drools:drools-core-reflective:7.62.0.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.drools:drools-core:7.62.0.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.kie.soup:kie-soup-xstream:7.62.0.Final" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: org.drools:drools-core-dynamic:7.62.0.Final" level="project" />
+    <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.15" level="project" />
+    <orderEntry type="library" name="Maven: org.kie:kie-memory-compiler:7.62.0.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.drools:drools-ecj:7.62.0.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.kie:kie-api:7.62.0.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.kie:kie-internal:7.62.0.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.kie.soup:kie-soup-maven-support:7.62.0.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.antlr:antlr-runtime:3.5.2" level="project" />
+    <orderEntry type="library" name="Maven: com.thoughtworks.xstream:xstream:1.4.18" level="project" />
+    <orderEntry type="library" name="Maven: io.github.x-stream:mxparser:1.2.2" level="project" />
+    <orderEntry type="library" name="Maven: xmlpull:xmlpull:1.1.3.1" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.30" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.projectlombok:lombok:1.18.10" level="project" />
+    <orderEntry type="library" name="Maven: org.drools:drools-mvel:7.62.0.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.mvel:mvel2:2.4.13.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.kie.soup:kie-soup-project-datamodel-commons:7.62.0.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.kie.soup:kie-soup-commons:7.62.0.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.kie.soup:kie-soup-project-datamodel-api:7.62.0.Final" level="project" />
+  </component>
+</module>
