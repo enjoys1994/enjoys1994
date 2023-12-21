@@ -1,4 +1,4 @@
-package com.example.drools.demo;
+package com.example.upload;
 
 import org.kie.api.KieServices;
 import org.kie.api.runtime.KieContainer;

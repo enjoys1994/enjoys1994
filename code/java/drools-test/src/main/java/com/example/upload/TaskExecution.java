@@ -1,4 +1,4 @@
-package com.example.drools.demo;
+package com.example.upload;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
