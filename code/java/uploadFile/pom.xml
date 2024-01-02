@@ -38,7 +38,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.example.upload.SSHFileUploader</mainClass>
+                            <mainClass>com.example.upload.UpgradeSEE</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
