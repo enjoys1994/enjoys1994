@@ -27,9 +27,9 @@
 </a>
   
 </div>
-
+<!--
 ![wanggy's github activity graph](https://activity-graph.herokuapp.com/graph?username=wangguoyan&theme=dracula)
-  
+  -->
 
 <p align="right"><a href="#top">⬆️ Back to top️</a></p>
 
