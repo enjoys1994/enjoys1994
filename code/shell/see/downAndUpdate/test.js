@@ -2,7 +2,7 @@ const https = require("https");
 const fs = require("fs");
 const { execSync }  =require("child_process")
 
-const projectPath = "/01standard/os/SEE2.0-paasV202306/SEE2.0-paasV202306.00.000";
+const projectPath = "/01standard/os/SEE2.0-paasV202306/SEE2.0-paasV202306.01.000";
 const repositoryName="see2.0-generic-test-local"
 const service = "https://dev.hundsun.com/frameV2/pms/workbench";
 // 用于过滤linux最新版本
